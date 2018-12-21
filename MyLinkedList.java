@@ -4,64 +4,70 @@ public class MyLinkedList{
     private int length;
     public MyLinkedList(){
       length=0;
-      start=null;
-      end=null;
+      start=new Node(null,null,null);
+      end=new Node(null,null,null);
     }
-    
-  private Node getn(int n){
-	  if(n<0 || n>length-1) {
-		  throw new IndexOutOfBoundsException();
+
+  private Node getn(int n){   //remember to turn this private
+	  if(n==0) {
+		  return start;
 	  }
-	  Node start=this.start;
-	  for(int i=0;i<length-1;i++) {
+	  if(n<0 || n>length) {
+		  throw new IndexOutOfBoundsException("index is out ofbounds");
+	  }
+	  Node current=this.start;
+	  for(int i=0;i<length;i++) {
 		  if(i==n) {
-			  return start;
+			  return current;
 		  }
 		  else {
-			  start=start.next();
+			  current=current.next();
 		  }
-		  
+
 	  }
 	  return end;
   }
   public boolean add(Integer i) {
-	  
-	  if(length<1) {
-		  Node node=new Node(i,null,null);
-		  start=node;
+
+	  if(length==0 ) {
+		 start=new Node(i,null,null);
+		 end=start;// end and start are the same
+		  length++;
+		  return true;
 	  }
-	  Node node=new Node(i,null,getn(length-1));
+	  else {
+	  Node node=new Node(i,null,this.end);
+	  this.getn(length-1).setNext(node);
+	  end=node;
 	  length++;
 	  return true;
+	  }
   }
   public int size() {
 	  return this.length;
   }
   public String toString() {
-	  String result="";
-	  Node start=this.start;
+	  String result="[";
+	  Node current=this.start;
 	  for(int i=0;i<this.length-1;i++) {
-		  result+=start.toString()+",";
-		  start=start.next();
+		  result+=current.toString()+",";
+		  //System.out.println(result);
+		  current=current.next();
 	  }
-	  result+=start.toString();
+	  result+=current.toString()+"]";
 	  return result;
   }
   public Integer get(int Index) {
 	  return this.getn(Index).getData();
   }
   public Integer set(int Index,Integer value) {
-	  if(Index<0|| Index>=this.length) {
+	  if(Index<0|| Index>this.length) {
 		  throw new IndexOutOfBoundsException();
 	  }
-	  Node start=this.start;
-	  for(int i=0;i<this.length-1;i++){
-		  if(i==Index) {
-			  return start.setData(value);
-		  }
-		  start=start.next();
-	  }
-	  return end.setData(value);
+	  Integer answer=this.getn(Index).getData();
+	  this.getn(Index).setData(value);
+	  return answer;
+
   }
   public boolean contains(Integer value) {
 	  Node start=this.start;
@@ -76,7 +82,7 @@ public class MyLinkedList{
   public int indexOf(Integer value) {
 	  Node start=this.start;
 	  for(int i=0;i<this.length;i++) {
-		  if(start.getData()==value) {
+		  if(start.getData().equals(value)) {
 			  return i;
 		  }
 		  start=start.next();
@@ -84,37 +90,32 @@ public class MyLinkedList{
 	  return -1;
   }
   public void add(int index,Integer value) {
-	  if(index<0|| index>=this.length) {
-		  throw new IndexOutOfBoundsException();
+	  if(index<0|| index>this.length) {
+		  throw new IndexOutOfBoundsException("index out ofbounds,dood");
 	  }
-	  length++;
 	  if(index==0) {
-		  Node next=this.getn(index);
-		  Node prev=next.prev();
-		  Node current=new Node(value,next,prev);
-		  prev.setNext(current);
-		  next.setPrev(current);
+		  Node current=new Node(value,start,null);
+		 start.setPrev(current);
+
 		  start=current;
+		  //length++;
 	  }
-	  else if(index==length-1) {
-		  Node next=this.getn(index);
-		  Node prev=next.prev();
-		  Node current=new Node(value,next,prev);
-		  prev.setNext(current);
-		  next.setPrev(current);
-		  end=current;
+	  else if(index==length) {
+		  this.add(value);
 	  }
+
 	  else {
-	    
-		  
+
+
 			  Node next=this.getn(index);
 			  Node prev=next.prev();
 			  Node current=new Node(value,next,prev);
 			  prev.setNext(current);
 			  next.setPrev(current);
-			  
-		     
-	     
+			  length++;
+
+
+
 	  }
   }
   public Integer remove(int index) {
@@ -125,31 +126,41 @@ public class MyLinkedList{
 		  Integer answer=this.getn(index).getData();
 		  this.start=this.getn(index+1);
 		  start.setPrev(null);
+		  length--;
 		  return answer;
 	  }
 	  else if(index==length-1) {
+
 		  Integer answer=this.getn(index).getData();
 		  this.end=this.getn(index-1);
-		  end.setNext(null);
+		  this.end.setNext(null);
+		  length--;
 		  return answer;
 	  }
 	  else {
+		      Integer answer=this.getn(index).getData();
 			  Node prev=this.getn(index-1);
 			  Node next=this.getn(index+1);
 			  prev.setNext(next);
 			  next.setPrev(prev);
-			  return this.getn(index).getData();
-		  
+			  length--;
+			  return answer;
+
 	  }
   }
   public boolean remove(Integer value) {
 	  for(int i=0;i<this.length;i++) {
-		  if(this.getn(i).getData()==value) {
+		  if(this.getn(i).getData().equals(value)) {
 			  this.remove(i);
+			  length--;
 			  return true;
 		  }
 	  }return false;
   }
-  
- }
-
+  public void extend (MyLinkedList other) {
+	  other.start.setPrev(this.end);
+	  this.end.setNext(other.start);
+	  this.length=this.length+other.length;
+	  this.end=other.end;
+  }
+}
